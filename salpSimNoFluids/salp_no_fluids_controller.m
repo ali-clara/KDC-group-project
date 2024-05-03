@@ -1,4 +1,4 @@
-function [force] = ROB542_HW1_controller_Shaevitz(t,X,c)
+function [force] = salp_no_fluids_controller(t,X,c)
 assert( isfield(c,'kp'));
 assert( isfield(c,'kd'));
 assert( isfield(c,'setpoint'));

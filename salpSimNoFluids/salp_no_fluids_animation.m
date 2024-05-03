@@ -1,4 +1,4 @@
-function ROB542_HW1_Animation_Shaevitz(p,t,X,exportVideo,playbackRate)
+function salp_no_fluids_animation(p,t,X,exportVideo,playbackRate)
 % Load-Spring-Damper-Actuator Animation 
 % Input
 %   p: Simulation constants

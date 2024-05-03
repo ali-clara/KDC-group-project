@@ -1,4 +1,4 @@
-function [t_vec,X_vec,sol_set] = ROB542_HW1_sim_Shaevitz(X0,p,c)
+function [t_vec,X_vec,sol_set] = salp_no_fluids_sim(X0,p,c)
 
 % Simulation timespan
 t_start = 0;
