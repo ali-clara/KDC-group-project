@@ -1,0 +1,36 @@
+% Name: Aiden Shaevitz
+% Date: 5/7/2024
+% Description: Test version of dynamics with all setup, sim functions,
+% controller functions, and animation functions baked into one script
+
+clc;
+clearvars;
+
+%% Setup
+% Initial conditions  X0 = [x1; v1; x2; v2]
+X0 = [0;  % nozzle position
+      0;  % nozzle velocity
+      0; % base position
+      0]; % base velocity
+
+% masses and constant force (gravity)
+p.m_nozzle = 1; %kg
+p.m_base = 1; % kg
+p.g = 9.81; % not really necessary (m/s^2)
+p.b_fluid  = 0;  % temp fluid damping (N*s/m)
+p.k_origami  = 5; % spring (N/m)
+p.srl = 0.1;  % Spring rest length (m)
+
+% control input function
+c.kp = 200;   
+c.kd = 10;
+c.setpoint = 2;
+c.forceLim = 100;
+c.use_setpoint = true; % If true, use setpoint instead of trajectory
+% Set an arbitrary trajectory
+trajectory_handle = @(t) sin(t); 
+c.trajectory = trajHandles(trajectory_handle);
+
+
+%% Run the simulation
+[t_vec,X_vec] = ROB542_HW1_sim_Shaevitz(X0,p,c);
