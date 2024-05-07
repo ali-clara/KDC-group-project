@@ -35,7 +35,7 @@ c.forceLim = 100;
 
 
 %% Run the simulation
-[t_vec,X_vec] = ROB542_HW1_sim_Shaevitz(X0,p,c);
+[t_vec,X_vec] = ode45something(X0,p,c);
 
 %% Dynamics
 function dX = contractionDynamics(t,X,p,controller)
@@ -48,4 +48,23 @@ function dX = contractionDynamics(t,X,p,controller)
     % Actuator
     dX(3) = X(4); % Vel
     dX(4) = "add in second equation here"
+end
+
+%% Control
+function [force] = salp_no_fluids_controller(t,X,c)
+assert( isfield(c,'kp'));
+assert( isfield(c,'kd'));
+assert( isfield(c,'setpoint'));
+
+if c.use_setpoint
+    force = c.kp*(c.setpoint - X(1)) + c.kd*(0 - X(2));
+else
+    x_des = c.trajectory.pf(t);
+    v_des = c.trajectory.vf(t);
+    
+    % PD force calculation
+    force = c.kp*(x_des - X(1)) + c.kd*(v_des - X(2));
+end
+
+
 end
