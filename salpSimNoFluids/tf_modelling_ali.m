@@ -55,12 +55,12 @@ k_origami = 98.1; % spring (N/m) - 0.004" plastic
 % Set up the state matrices
 
 %% Solve with STEP
-close all; clc
-
-sys = ss(A, B, C, D);
-step_tfinal = 20;
-[y_step, t_step] = step(sys, tfinal);
-plot(t_step, y_step)
+% close all; clc
+% 
+% sys = ss(A, B, C, D);
+% step_tfinal = 20;
+% [y_step, t_step] = step(sys, tfinal);
+% plot(t_step, y_step)
 
 %% Solve with ODE45 
 % (should be the same as above if x0=[0,0] and f=[1])
@@ -119,6 +119,10 @@ plot(t_cooling, y_cooling(:,2)*1000)
 xlabel("Time (sec)")
 ylabel("V_{mass} (mm/s)")
 title("Velocity of Cap: Expansion")
+
+%% Animation
+X = [X_vec(1,:); X_vec(3,:)];
+salp_no_fluids_animation(p,t_vec,X,false,1);
 
 %% Functions
 

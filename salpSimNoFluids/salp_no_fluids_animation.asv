@@ -66,21 +66,17 @@ for t_plt = t(1):playbackRate*1.0/FPS:t(end)
     cap_end_state = interp1(t',X(1,:)',t_plt);
     cap_end_pos = cap_end_state(1);
     capEndObj.resetFrame
-    capEndObj.globalMove(SE3([0, cap_end_pos, 0]));
+    capEndObj.globalMove(SE3([0, load_pos, 0]));
     
-    % Interpolate and set the frontcap position
-    cap_front_state = interp1(t',X(2,:)',t_plt);
-    cap_front_pos = cap_front_state(1);
+    % Set the frontcap position
     capFrontObj.resetFrame
-    capFrontObj.globalMove(SE3([0, cap_front_pos, 0]))
+    capFrontObj.globalMove(SE3([0, actuator_pos, 0]))
 
     % Spring Position
-    % Under compression
-    if cap_front_pos < (cap_end_pos + p.srl)
-        spring_compression = p.srl - (cap_front_pos - cap_end_pos);
-        springObj.updateState(SE3([0, cap_end_pos, 0,0,0,pi/2]),...
+    if load_pos < (actuator_pos + p.srl)
+        spring_compression = p.srl - (load_pos - actuator_pos);
+        springObj.updateState(SE3([0, actuator_pos, 0,0,0,pi/2]),...
                               p.srl-spring_compression)
-    % At spring resting length
     else
         springObj.updateState(SE3([0, actuator_pos, 0,0,0,pi/2]),p.srl)
     end
