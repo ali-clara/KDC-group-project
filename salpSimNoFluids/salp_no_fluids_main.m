@@ -15,12 +15,12 @@ X0 = [2;  %load position
       0]; %actuator velocity
 
 % masses and constant force (gravity)
-p.ml = 1; %kg
-p.ma = 5; % kg
+p.ml = 0.015; %kg
+p.ma = 0.015; % kg
 p.g = 9.8; %m/s^2
 p.b  = 5;  % damper (N*s/m)
-p.k  = 40; % spring (N/m)
-p.srl = 2;  % Spring rest length (m)
+p.k  = 18.25; % spring (N/m)
+p.srl = .003;  % Spring rest length (m)
 
 % control input function
 c.kp = 200;   
