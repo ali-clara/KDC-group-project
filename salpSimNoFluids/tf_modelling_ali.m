@@ -122,7 +122,8 @@ title("Velocity of Cap: Expansion")
 
 %% Animation
 p.srl = 0.04;
-X = [zeros(size(y_heating(:,1))); y_heating(:,1)+p.srl];
+fixed_cap = zeros(size(y_heating(:,1)));
+X = [fixed_cap; y_heating(:,1)+p.srl];
 salp_no_fluids_animation(p,t_heating,X,false,1);
 
 %% Functions

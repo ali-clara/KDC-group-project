@@ -18,11 +18,11 @@ addpath(fullfile(pwd,'..', 'groupTheory'))
 addpath(fullfile(pwd,'..', 'visualization'))
 
 % Create objects
-front_cap_height = 0.01;
-end_cap_height = 0.01;
-capFrontObj = CubeClass([front_cap_height, front_cap_height]);
-capEndObj = CubeClass([end_cap_height, end_cap_height]);
-springObj = SpringClass(SE3, p.srl);
+front_cap_height = 0.002;
+end_cap_height = 0.002;
+capFrontObj = CubeClass([front_cap_height, front_cap_height*3]);
+capEndObj = CubeClass([end_cap_height, end_cap_height*3]);
+% springObj = SpringClass(SE3, p.srl);
 
 % Create a figure handle
 h.figure = figure;
@@ -33,7 +33,7 @@ movegui(h.figure)
 % Put the shapes into a plot
 capFrontObj.plot
 capEndObj.plot
-springObj.plot
+% springObj.plot
 
 % Figure properties
 view(2)
@@ -58,15 +58,15 @@ tic;
 for t_plt = t(1):playbackRate*1.0/FPS:t(end)
     
     % Set axis limits (These will respect the aspect ratio set above)
-    h.figure.Children(1).XLim = [-0.5, 0.5];
-    h.figure.Children(1).YLim = [-0.5, 0.5];
+    h.figure.Children(1).XLim = [-0.1, 0.1];
+    h.figure.Children(1).YLim = [-0.05, 0.05];
     h.figure.Children(1).ZLim = [-1.0, 1.0];
 
     % Interpolate and set the endcap position
     cap_end_state = interp1(t',X(1,:)',t_plt);
     cap_end_pos = cap_end_state(1);
     capEndObj.resetFrame
-    capEndObj.globalMove(SE3([0, cap_end_pos, 0]));
+    capEndObj.globalMove(SE3([cap_end_pos,0, 0]));
     
     % Interpolate and set the frontcap position
     cap_front_state = interp1(t',X(2,:)',t_plt);
@@ -77,19 +77,19 @@ for t_plt = t(1):playbackRate*1.0/FPS:t(end)
 
     % Spring Position
     % Under compression
-    if cap_front_pos < (cap_end_pos + p.srl)
-        spring_compression = p.srl - (cap_front_pos - cap_end_pos);
-        springObj.updateState(SE3([cap_end_pos, 0, 0,0,0,pi/2]),...
-                              p.srl-spring_compression)
-    % At spring resting length
-    else
-        springObj.updateState(SE3([cap_end_pos, 0,0,0,0,pi/2]),p.srl)
-    end
+    % if cap_front_pos < (cap_end_pos + p.srl)
+    %     spring_compression = p.srl - (cap_front_pos - cap_end_pos);
+    %     springObj.updateState(SE3([cap_end_pos, 0, 0,0,0,pi/2]),...
+    %                           p.srl-spring_compression)
+    % % At spring resting length
+    % else
+    %     springObj.updateState(SE3([cap_end_pos, 0,0,0,0,pi/2]),p.srl)
+    % end
     
     % Update data
     capFrontObj.updatePlotData
     capEndObj.updatePlotData
-    springObj.updatePlotData
+    % springObj.updatePlotData
     
     if exportVideo %Draw as fast as possible for video export
         drawnow
