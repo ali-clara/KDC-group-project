@@ -121,8 +121,9 @@ ylabel("V_{mass} (mm/s)")
 title("Velocity of Cap: Expansion")
 
 %% Animation
-X = [X_vec(1,:); X_vec(3,:)];
-salp_no_fluids_animation(p,t_vec,X,false,1);
+p.srl = 0.04;
+X = [zeros(size(y_heating(:,1))); y_heating(:,1)+p.srl];
+salp_no_fluids_animation(p,t_heating,X,false,1);
 
 %% Functions
 
@@ -130,7 +131,7 @@ function dxdt = odefcn_heating(t, x, m, b, k, input_force, input_t)
     % f_t = ft(input_force, input_t, t);
     f_t = interp1(input_t, input_force, t, 'linear', 'extrap');
     dxdt = zeros(2,1);
-    dxdt(1) = (-b/m)*x(1) + (-1/m)*x(2) + (1/m)*f_t;
+    dxdt(1) = (-b/m)*x(1) + (-1/m)*x(2) + 6*(1/m)*f_t;
     dxdt(2) = k*x(1);
 end
 

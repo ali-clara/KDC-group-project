@@ -10,7 +10,7 @@ function salp_no_fluids_animation(p,t,X,exportVideo,playbackRate)
 % By Kevin Green 2021
 
 % FPS for playback and video export
-FPS = 60; % If your computer cannot plot in realtime lower this.
+FPS = 30; % If your computer cannot plot in realtime lower this.
 
 % For SE3
 addpath(fullfile(pwd,'..', 'groupTheory'))
@@ -18,10 +18,10 @@ addpath(fullfile(pwd,'..', 'groupTheory'))
 addpath(fullfile(pwd,'..', 'visualization'))
 
 % Create objects
-front_cap_height = 0.25;
-end_cap_height = 0.25;
-capFrontObj = CubeClass([2, front_cap_height]);
-capEndObj = CubeClass([2, end_cap_height]);
+front_cap_height = 0.01;
+end_cap_height = 0.01;
+capFrontObj = CubeClass([front_cap_height, front_cap_height]);
+capEndObj = CubeClass([end_cap_height, end_cap_height]);
 springObj = SpringClass(SE3, p.srl);
 
 % Create a figure handle
@@ -58,8 +58,8 @@ tic;
 for t_plt = t(1):playbackRate*1.0/FPS:t(end)
     
     % Set axis limits (These will respect the aspect ratio set above)
-    h.figure.Children(1).XLim = [-4, 4];
-    h.figure.Children(1).YLim = [-15, 30];
+    h.figure.Children(1).XLim = [-0.5, 0.5];
+    h.figure.Children(1).YLim = [-0.5, 0.5];
     h.figure.Children(1).ZLim = [-1.0, 1.0];
 
     % Interpolate and set the endcap position
@@ -71,18 +71,19 @@ for t_plt = t(1):playbackRate*1.0/FPS:t(end)
     % Interpolate and set the frontcap position
     cap_front_state = interp1(t',X(2,:)',t_plt);
     cap_front_pos = cap_front_state(1);
+    disp(cap_front_pos)
     capFrontObj.resetFrame
-    capFrontObj.globalMove(SE3([0, cap_front_pos, 0]))
+    capFrontObj.globalMove(SE3([cap_front_pos, 0, 0]))
 
     % Spring Position
     % Under compression
     if cap_front_pos < (cap_end_pos + p.srl)
         spring_compression = p.srl - (cap_front_pos - cap_end_pos);
-        springObj.updateState(SE3([0, cap_end_pos, 0,0,0,pi/2]),...
+        springObj.updateState(SE3([cap_end_pos, 0, 0,0,0,pi/2]),...
                               p.srl-spring_compression)
     % At spring resting length
     else
-        springObj.updateState(SE3([0, actuator_pos, 0,0,0,pi/2]),p.srl)
+        springObj.updateState(SE3([cap_end_pos, 0,0,0,0,pi/2]),p.srl)
     end
     
     % Update data
