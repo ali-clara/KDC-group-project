@@ -122,9 +122,18 @@ title("Velocity of Cap: Expansion")
 
 %% Animation
 p.srl = 0.04;
-fixed_cap = zeros(size(y_heating(:,1)));
-X = [fixed_cap y_heating+p.srl];
-salp_no_fluids_animation(p,t_heating,X,false,1);
+% Position of end cap is just at zero for now
+fixed_cap_pos = [zeros(size(y_heating(:,1))); zeros(size(y_cooling(:,1)));];
+
+% Concatenation of heating and cooling positions
+moving_cap_pos = [y_heating(:,1)+p.srl ; y_cooling(:,1)+p.srl];
+t_all = [t_heating; t_cooling+t_heating(end)+0.0000001]; % Need to add the 0.0000001 to make the time values all unique for the interpolation in the animation
+
+% Horizontally concatenation fixed end cap and front cap positions
+X = [fixed_cap_pos moving_cap_pos];
+
+% Animate
+salp_no_fluids_animation(p,t_all,X,false,1);
 
 %% Functions
 
