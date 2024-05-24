@@ -126,7 +126,7 @@ p.srl = 0.04;
 fixed_cap_pos = [zeros(size(y_heating(:,1))); zeros(size(y_cooling(:,1)));];
 
 % Concatenation of heating and cooling positions
-moving_cap_pos = [y_heating(:,1)+p.srl ; y_cooling(:,1)+p.srl];
+moving_cap_pos = [-y_heating(:,1)+p.srl ; y_cooling(:,1)+p.srl];
 t_all = [t_heating; t_cooling+t_heating(end)+0.0000001]; % Need to add the 0.0000001 to make the time values all unique for the interpolation in the animation
 
 % Horizontally concatenation fixed end cap and front cap positions
