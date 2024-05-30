@@ -31,7 +31,7 @@ plot(cooling_t, cooling_force)
 %% T1 Thruster Configuration
 close all; clc
 
-b_fluid = 30; % damper (N*s/m) - currently a total guess
+b_origami = 30; % damper (N*s/m) - currently a total guess
 m_cap = 0.015; % mass (kg)
 k_origami = 98.1; % spring (N/m) - 0.004" plastic
 % k_origami = 18.25 % spring (N/m) - 0.002" plastic
@@ -39,20 +39,10 @@ k_tca = 25.4; % (N/m) - spring constant of TCAs between 0-4mm, becomes more nonl
 b_tca = 25.4; % In water, cooling time constant = 1 (tau = B/K)
 
 % Set up the state matrices
-A = [-b_fluid/m_cap, -1/m_cap; k_origami, 0];
+A = [-b_origami/m_cap, -1/m_cap; k_origami, 0];
 B = [1/m_cap; 0];
 C = [0, 1/k_origami; 1, 0];
 D = [0; 0];
-
-%% T2 Thruster Configuration
-close all; clc
-
-b_fluid = 10; % damper (N*s/m) - currently a total guess
-m_cap = 0.015; % mass (kg)
-k_origami = 98.1; % spring (N/m) - 0.004" plastic
-% k_origami = 18.25 % spring (N/m) - 0.002" plastic
-
-% Set up the state matrices
 
 %% Solve with STEP
 % close all; clc
@@ -72,7 +62,7 @@ tfinal = 10;
 tspan = [0, tfinal];
 
 % find the state variables (x)
-[t_heating,x_heating] = ode45(@(t,x) odefcn_heating(t,x,m_cap,b_fluid,k_origami,heating_force,heating_t), tspan, x0);
+[t_heating,x_heating] = ode45(@(t,x) odefcn_heating(t,x,m_cap,b_origami,k_origami,heating_force,heating_t), tspan, x0);
 
 % use the state variables (x) to find the output variables (y)
 sz = size(x_heating); 
@@ -87,7 +77,7 @@ tfinal = 5;
 tspan = [0, tfinal];
 
 % find the state variables (x)
-[t_cooling, x_cooling] = ode45(@(t,x) odefcn_cooling(t, x, m_cap, b_fluid, k_origami, b_tca, k_tca), tspan, x0);
+[t_cooling, x_cooling] = ode45(@(t,x) odefcn_cooling(t, x, m_cap, b_origami, k_origami, b_tca, k_tca), tspan, x0);
 
 % use the state variables (x) to find the output variables (y)
 sz = size(x_cooling); 
