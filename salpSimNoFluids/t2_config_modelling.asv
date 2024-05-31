@@ -35,11 +35,11 @@ b_origami = 20; % damper (N*s/m) - currently a total guess
 m_cap = 0.015; % mass (kg)
 
 k_origami = 18.25; % spring constant of the origami (N/m) - 0.002" plastic
-k_spring = 300*2; % spring constant of the extension spring (N/m)
+k_spring = 150*2; % spring constant of the extension spring (N/m)
 k_eq = k_spring - k_origami; % the origami is working against the spring
 
 k_tca = 6*25.4; % (N/m) - spring constant of TCAs between 0-4mm, becomes more nonlinear after that
-b_tca = 100; % In water, cooling time constant = 1 (tau = B/K)
+b_tca = k_tca; % In water, cooling time constant = 1 (tau = B/K)
 
 % Set up the state matrices
 A = [-b_origami/m_cap, -1/m_cap; k_eq, 0];
@@ -65,16 +65,16 @@ tfinal = 10;
 tspan = [0, tfinal];
 
 % find the state variables (x)
-[t_heating,x_heating] = ode45(@(t,x) odefcn_heating(t,x,m_cap,b_origami,k_eq,heating_force,heating_t), tspan, x0);
+[t_heating,x_heating] = ode45(@(t,x) odefcn_heating(t,x,m_cap,b_origami,k_origami,heating_force,heating_t), tspan, x0);
 
 % use the state variables (x) to find the output variables (y)
 sz = size(x_heating); 
 y_heating = zeros(sz); 
-y_heating(:,1) = (1/k_eq)*x_heating(:,2); % displacement of the mass
+y_heating(:,1) = (1/k_origami)*x_heating(:,2); % displacement of the mass
 y_heating(:,2) = x_heating(:,1); % velocity of the mass
 
 % Cooling response
-x0 = [x_heating(end,1); x_heating(end,2); -x_heating(end,2)]; % assuming F_tca = -F_origami at t=0
+x0 = [x_heating(end,1); -x_heating(end,2); x_heating(end,2)]; % assuming F_tca = -F_origami at t=0
 tfinal = 10;
 tspan = [0, tfinal];
 
@@ -84,7 +84,7 @@ tspan = [0, tfinal];
 % use the state variables (x) to find the output variables (y)
 sz = size(x_cooling); 
 y_cooling = zeros(sz); 
-y_cooling(:,1) = (1/k_eq)*x_cooling(:,2); % displacement of the mass
+y_cooling(:,1) = (1/k_origami)*x_cooling(:,3); % displacement of the mass
 y_cooling(:,2) = x_cooling(:,1); % velocity of the mass
 
 figure
