@@ -76,7 +76,7 @@ y_heating(:,2) = x_heating(:,1); % velocity of the mass
 
 % Cooling response
 x0 = [x_heating(end,1); -x_heating(end,2); x_heating(end,2)]; % assuming F_tca = -F_origami at t=0
-tfinal = 10;
+tfinal = 15;
 tspan = [0, tfinal];
 
 % find the state variables (x)
@@ -96,13 +96,14 @@ data_freq = Time(3) - Time(2);
 
 figure
 subplot(2,2,1)
-plot(t_heating, y_heating(:,1)*1000)
-hold on
 plot(t, 66-y)
+hold on
+plot(t_heating, y_heating(:,1)*1000)
+plot(t_cooling+5.5, y_cooling(:,1)*1000)
 xlabel("Time (sec)")
 ylabel("X_{mass} (mm)")
-title("Displacement of Cap: Contraction")
-legend("Model", "Data")
+title("Displacement of Cap")
+legend("Data", "Contraction Model", "Expansion Model")
 
 subplot(2,2,2)
 plot(t_heating, y_heating(:,2)*1000)
