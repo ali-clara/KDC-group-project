@@ -48,7 +48,7 @@ h.figure.Children(1).DataAspectRatio = [1 1 1];
 
 % Setup videowriter object
 if exportVideo
-   v = VideoWriter('ME542_HW1_Animation.mp4', 'MPEG-4');
+   v = VideoWriter('ME542_HW1_Animation', 'MPEG-4');
    v.FrameRate = FPS;
    open(v)
 end
@@ -58,8 +58,8 @@ tic;
 for t_plt = t(1):playbackRate*1.0/FPS:t(end)
     
     % Set axis limits (These will respect the aspect ratio set above)
-    h.figure.Children(1).XLim = [-0.1, 0.1];
-    h.figure.Children(1).YLim = [-0.05, 0.05];
+    h.figure.Children(1).XLim = [-0.025, 0.05];
+    h.figure.Children(1).YLim = [-0.025, 0.025];
     h.figure.Children(1).ZLim = [-1.0, 1.0];
 
     % Interpolate and set the endcap position

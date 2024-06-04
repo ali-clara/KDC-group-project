@@ -1,12 +1,10 @@
 clear all; close all; clc
 
-load 3W_air_length.mat
-
 %% Inputs 
 close all; clc
 
 % load input force ("force") and time ("time)
-load 3W_air_response.mat;
+load experimental-data\3W_air_force.mat;
 input_force = force / 1000; % N
 input_t = time - time(1); % sec
 data_freq = time(3) - time(2);
@@ -34,12 +32,22 @@ plot(cooling_t, cooling_force)
 %% T1 Thruster Configuration
 close all; clc
 
-b_origami = 300; % damper (N*s/m) - currently a total guess
-m_cap = 0.015; % mass (kg)
+tca_num = 4; % number of TCAs in the current configuration
+
+b_origami = 300; % damper (N*s/m) - found from system identification in air
 k_origami = 98.1; % spring (N/m) - 0.004" plastic
 % k_origami = 18.25 % spring (N/m) - 0.002" plastic
-k_tca = 6*25.4; % (N/m) - spring constant of TCAs between 0-4mm, becomes more nonlinear after that
+
+m_cap = 0.015; % mass (kg)
+% m_added = 0.065; % added water term
+m_added = 0;
+m_total = m_cap + m_added;
+
+k_tca = tca_num*25.4; % (N/m) - spring constant of TCAs between 0-4mm, becomes more nonlinear after that
 b_tca = k_tca; % In water, cooling time constant = 1 (tau = B/K)
+
+%% Solve with STEP
+close all; clc
 
 % Set up the state matrices
 A = [-b_origami/m_cap, -1/m_cap; k_origami, 0];
@@ -47,13 +55,10 @@ B = [1/m_cap; 0];
 C = [0, 1/k_origami; 1, 0];
 D = [0; 0];
 
-%% Solve with STEP
-% close all; clc
-% 
-% sys = ss(A, B, C, D);
-% step_tfinal = 20;
-% [y_step, t_step] = step(sys, tfinal);
-% plot(t_step, y_step)
+sys = ss(A, B, C, D);
+step_tfinal = 20;
+[y_step, t_step] = step(sys, tfinal);
+plot(t_step, y_step)
 
 %% Solve with ODE45 
 % (should be the same as above if x0=[0,0] and f=[1])
@@ -65,8 +70,8 @@ tfinal = 5.5;
 tspan = [0, tfinal];
 
 % find the state variables (x)
-tca_num = 4;
-[t_heating,x_heating] = ode45(@(t,x) odefcn_heating(t,x,m_cap,b_origami,k_origami,heating_force,heating_t,tca_num), tspan, x0);
+% tca_num = 4;
+[t_heating,x_heating] = ode45(@(t,x) odefcn_heating(t,x,m_total,b_origami,k_origami,heating_force,heating_t,tca_num), tspan, x0);
 
 % use the state variables (x) to find the output variables (y)
 sz = size(x_heating); 
@@ -80,7 +85,7 @@ tfinal = 15;
 tspan = [0, tfinal];
 
 % find the state variables (x)
-[t_cooling, x_cooling] = ode45(@(t,x) odefcn_cooling(t, x, m_cap, b_origami, k_origami, b_tca, k_tca), tspan, x0);
+[t_cooling, x_cooling] = ode45(@(t,x) odefcn_cooling(t, x, m_total, b_origami, k_origami, b_tca, k_tca), tspan, x0);
 
 % use the state variables (x) to find the output variables (y)
 sz = size(x_cooling); 
@@ -88,40 +93,49 @@ y_cooling = zeros(sz);
 y_cooling(:,1) = (1/k_origami)*x_cooling(:,3); % displacement of the mass
 y_cooling(:,2) = x_cooling(:,1); % velocity of the mass
 
-% compare to real data
-load 3W_air_length.mat
-y = Displacement; % mm
-t = Time - Time(1); % sec
+%% Plots
+close all; clc
+
+% load real data
+load experimental-data\3W_air_length.mat
+y = cast(Displacement, "double"); % mm
+t = Time; % sec
 data_freq = Time(3) - Time(2);
 
-figure
-subplot(2,2,1)
-plot(t, 66-y)
+% some trimming to the area of interest
+y = y(15:end);
+t = t(15:end);
+t = t - t(1);
+
+% % slice to area of interest and rescale
+% y = y(240:600);
+% t = t(240:600) - t(240);
+% y = (y-y(1))*1.33+y(1); % adjust for water magnification
+% y = y / y(1) * 51; % rescale from px to mm
+
+% figure
+plot(t, y(1)-y)
 hold on
 plot(t_heating, y_heating(:,1)*1000)
 plot(t_cooling+5.5, y_cooling(:,1)*1000)
+% plot(t_cooling+8, y_cooling(:,1)*1000)
 xlabel("Time (sec)")
 ylabel("X_{mass} (mm)")
 title("Displacement of Cap")
 legend("Data", "Contraction Model", "Expansion Model")
 
-subplot(2,2,2)
+figure
+subplot(1,2,1)
 plot(t_heating, y_heating(:,2)*1000)
 xlabel("Time (sec)")
 ylabel("V_{mass} (mm/s)")
 title("Velocity of Cap: Contraction")
 
-subplot(2,2,3)
-plot(t_cooling, y_cooling(:,1)*1000)
-xlabel("Time (sec)")
-ylabel("X_{mass} (mm)")
-title("Displacement of Cap: Expansion")
-
-subplot(2,2,4)
-plot(t_cooling, y_cooling(:,2)*1000)
-xlabel("Time (sec)")
-ylabel("V_{mass} (mm/s)")
-title("Velocity of Cap: Expansion")
+% subplot(1,2,2)
+% plot(t_cooling, y_cooling(:,2)*1000)
+% xlabel("Time (sec)")
+% ylabel("V_{mass} (mm/s)")
+% title("Velocity of Cap: Expansion")
 
 %% Animation
 p.srl = 0.04;
@@ -136,7 +150,7 @@ t_all = [t_heating; t_cooling+t_heating(end)+0.0000001]; % Need to add the 0.000
 X = [fixed_cap_pos moving_cap_pos];
 
 % Animate
-salp_no_fluids_animation(p,t_all,X,false,1);
+salp_no_fluids_animation(p,t_all,X,true,1);
 
 %% Functions
 
