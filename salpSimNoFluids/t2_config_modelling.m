@@ -31,7 +31,7 @@ plot(cooling_t, cooling_force)
 %% T2 Thruster Configuration
 close all; clc
 
-b_origami = 20; % damper (N*s/m) - currently a total guess
+b_origami = 300; % damper (N*s/m) - currently a total guess
 m_cap = 0.015; % mass (kg)
 
 k_origami = 18.25; % spring constant of the origami (N/m) - 0.002" plastic
