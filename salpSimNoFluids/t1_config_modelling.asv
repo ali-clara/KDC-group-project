@@ -4,7 +4,7 @@ clear all; close all; clc
 close all; clc
 
 % load input force ("force") and time ("time)
-load experimental-data\3W_air_force.mat;
+load experimental-data\8W_water_force.mat;
 input_force = force / 1000; % N
 input_t = time - time(1); % sec
 data_freq = time(3) - time(2);
@@ -32,21 +32,19 @@ plot(cooling_t, cooling_force)
 %% T1 Thruster Configuration
 close all; clc
 
-tca_num = 4; % number of TCAs in the current configuration
+tca_num = 6; % number of TCAs in the current configuration
 
 d_cap = 48; %mm
 d_nozzle = 2; % mm
-pressure_term = 0.7*(d_cap^2 - d_nozzle^2)/d_cap^2; % dimensionless pressure force term
-pressure_term = 0;
+pressure_term = (d_cap^2 - d_nozzle^2)/d_cap^2; % dimensionless pressure force term
 
-b_origami = 300; % damper (N*s/m) - found from system identification in 
-% b_origami = 2;
+b_origami = 300; % damper (N*s/m) - found from system identification in air
 k_origami = 98.1; % spring (N/m) - 0.004" plastic
-% k_origami = 18.25; % spring (N/m) - 0.002" plastic
-% k_origami = 187;
+% k_origami = 18.25 % spring (N/m) - 0.002" plastic
 
 m_cap = 0.015; % mass (kg)
-m_added = 0; % added water term
+% m_added = 0.065; % added water term
+m_added = 0;
 m_total = m_cap + m_added;
 
 k_tca = tca_num*25.4; % (N/m) - spring constant of TCAs between 0-4mm, becomes more nonlinear after that
@@ -76,6 +74,7 @@ tfinal = 5.5;
 tspan = [0, tfinal];
 
 % find the state variables (x)
+% tca_num = 4;
 [t_heating,x_heating] = ode45(@(t,x) odefcn_heating(t,x,m_total,b_origami,k_origami,heating_force,heating_t,pressure_term,tca_num), tspan, x0);
 
 % use the state variables (x) to find the output variables (y)
@@ -86,7 +85,7 @@ y_heating(:,2) = x_heating(:,1); % velocity of the mass
 
 % Cooling response
 x0 = [x_heating(end,1); -x_heating(end,2); x_heating(end,2)]; % assuming F_tca = -F_origami at t=0
-tfinal = 5;
+tfinal = 15;
 tspan = [0, tfinal];
 
 % find the state variables (x)
@@ -112,23 +111,29 @@ y = y(15:end);
 t = t(15:end);
 t = t - t(1);
 
+% % slice to area of interest and rescale
+% y = y(240:600);
+% t = t(240:600) - t(240);
+% y = (y-y(1))*1.33+y(1); % adjust for water magnification
+% y = y / y(1) * 51; % rescale from px to mm
+
 % figure
 plot(t, y(1)-y)
 hold on
 plot(t_heating, y_heating(:,1)*1000)
 plot(t_cooling+5.5, y_cooling(:,1)*1000)
-% % plot(t_cooling+7, y_cooling(:,1)*1000)
+% plot(t_cooling+8, y_cooling(:,1)*1000)
 xlabel("Time (sec)")
 ylabel("X_{mass} (mm)")
 title("Displacement of Cap")
 legend("Data", "Contraction Model", "Expansion Model")
 
-% figure
-% subplot(1,2,1)
-% plot(t_heating, y_heating(:,2)*1000)
-% xlabel("Time (sec)")
-% ylabel("V_{mass} (mm/s)")
-% title("Velocity of Cap: Contraction")
+figure
+subplot(1,2,1)
+plot(t_heating, y_heating(:,2)*1000)
+xlabel("Time (sec)")
+ylabel("V_{mass} (mm/s)")
+title("Velocity of Cap: Contraction")
 
 % subplot(1,2,2)
 % plot(t_cooling, y_cooling(:,2)*1000)
@@ -154,10 +159,10 @@ salp_no_fluids_animation(p,t_all,X,true,1);
 %% Functions
 
 function dxdt = odefcn_heating(t, x, m, b, k, input_force, input_t, pressure_force, tca_num)
-    f_t = tca_num*interp1(input_t, input_force, t, 'linear', 'extrap');
-    f_eq = f_t*(1 - pressure_force);
+    f_t = interp1(input_t, input_force, t, 'linear', 'extrap');
+    f_eq = f_t - pressure_force;
     dxdt = zeros(2,1);
-    dxdt(1) = (-b/m)*x(1) + (-1/m)*x(2) + (1/m)*f_eq;
+    dxdt(1) = (-b/m)*x(1) + (-1/m)*x(2) + (1/m)*tca_num*f_eq;
     dxdt(2) = k*x(1);
 end
 
