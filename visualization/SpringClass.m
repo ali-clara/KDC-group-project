@@ -25,18 +25,19 @@ classdef SpringClass < Shape
 
     methods
         % Constructor
-        function obj = SpringClass(f, l)
+        function obj = SpringClass(f, l, rs)
             % Defaults if no arguments
             if nargin == 0
                 f = SE3; % Frame
                 l = 1;   % Length
+                rs = rs;
             end
 
             % Call the Shape superclass constructor
             obj = obj@Shape;
 
             % Make a coil
-            radius = l/15;
+            radius = l/rs;
             coilTurns   = 3.5;
             coilPoints  = 0:pi/50:coilTurns*2*pi;
             yCoilPoints = sin(coilPoints)*radius;

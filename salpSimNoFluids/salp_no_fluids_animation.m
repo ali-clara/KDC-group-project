@@ -22,7 +22,7 @@ front_cap_height = 0.002;
 end_cap_height = 0.002;
 capFrontObj = CubeClass([front_cap_height, front_cap_height*3]);
 capEndObj = CubeClass([end_cap_height, end_cap_height*3]);
-springObj = SpringClass(SE3, p.srl);
+springObj = SpringClass(SE3, p.srl,30);
 
 % Create a figure handle
 h.figure = figure;
