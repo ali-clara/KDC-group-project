@@ -18,11 +18,14 @@ addpath(fullfile(pwd,'..', 'groupTheory'))
 addpath(fullfile(pwd,'..', 'visualization'))
 
 % Create objects
-front_cap_height = 0.002;
-end_cap_height = 0.002;
-capFrontObj = CubeClass([front_cap_height, front_cap_height*3]);
-capEndObj = CubeClass([end_cap_height, end_cap_height*3]);
-springObj = SpringClass(SE3, p.srl,30);
+front_cap_height = 0.004;
+end_cap_height = 0.004;
+capFrontObj = CubeClass([front_cap_height, front_cap_height*4]);
+capEndObj = CubeClass([end_cap_height, end_cap_height*4]);
+springObj = SpringClass(SE3, p.srl,6);
+springObji = SpringClass(SE3, p.srl,6);
+springObjt1 = SpringClass(SE3, p.srl,2000);
+springObjt2 = SpringClass(SE3, p.srl,2000);
 
 % Create a figure handle
 h.figure = figure;
@@ -34,6 +37,9 @@ movegui(h.figure)
 capFrontObj.plot
 capEndObj.plot
 springObj.plot
+springObji.plot
+springObjt1.plot
+springObjt2.plot
 
 % Figure properties
 view(2)
@@ -58,7 +64,7 @@ tic;
 for t_plt = t(1):playbackRate*1.0/FPS:t(end)
     
     % Set axis limits (These will respect the aspect ratio set above)
-    h.figure.Children(1).XLim = [-0.025, 0.05];
+    h.figure.Children(1).XLim = [-0.015, 0.05];
     h.figure.Children(1).YLim = [-0.025, 0.025];
     h.figure.Children(1).ZLim = [-1.0, 1.0];
 
@@ -80,20 +86,41 @@ for t_plt = t(1):playbackRate*1.0/FPS:t(end)
         spring_compression = p.srl - (cap_front_pos - cap_end_pos);
         springObj.updateState(SE3([cap_end_pos, 0,0,0,0,0]),...
                               p.srl-spring_compression)
+        springObji.updateState(SE3([cap_end_pos, 0,0,pi,0,0]),...
+                              p.srl-spring_compression)
+        springObjt1.updateState(SE3([cap_end_pos, 0.0075,0,0,0,0]),...
+                              p.srl-spring_compression)
+        springObjt2.updateState(SE3([cap_end_pos, -0.0075,0,0,0,0]),...
+                              p.srl-spring_compression)
     % Tension
     elseif cap_front_pos > (cap_end_pos + p.srl)
         spring_extension = -p.srl + (cap_front_pos - cap_end_pos);
         springObj.updateState(SE3([cap_end_pos, 0,0,0,0,0]),...
                               p.srl+spring_extension)
+        springObji.updateState(SE3([cap_end_pos, 0,0,pi,0,0]),...
+                              p.srl+spring_extension)
+        springObjt1.updateState(SE3([cap_end_pos, 0.0075,0,0,0,0]),...
+                              p.srl+spring_extension)
+        springObjt2.updateState(SE3([cap_end_pos, -0.0075,0,0,0,0]),...
+                              p.srl+spring_extension)
+        
+        
     % At spring resting length
     else
         springObj.updateState(SE3([cap_end_pos, 0,0,0,0,0]),p.srl)
+        springObji.updateState(SE3([cap_end_pos, 0,0,pi,0,0]),p.srl)
+        springObjt1.updateState(SE3([cap_end_pos, 0.0075,0,0,0,0]),p.srl)
+        springObjt2.updateState(SE3([cap_end_pos, -0.0075,0,0,0,0]),p.srl)
     end
     
     % Update data
     capFrontObj.updatePlotData
     capEndObj.updatePlotData
     springObj.updatePlotData
+    springObji.updatePlotData
+    springObjt1.updatePlotData
+    springObjt2.updatePlotData
+
     
     if exportVideo %Draw as fast as possible for video export
         drawnow

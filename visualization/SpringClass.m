@@ -53,9 +53,10 @@ classdef SpringClass < Shape
             % Save the frame
             obj.frame = f;
             % Coil length is 70% spring length
-            xCoil = linspace(l*0.15,l*0.85,length(obj.y)-2);
+            xCoil = linspace(l*0.05,l*0.95,length(obj.y)-2);
             % Endpoints
             obj.x = [0 xCoil l];
+            % obj.y = 
         end
 
         function plot(obj)
