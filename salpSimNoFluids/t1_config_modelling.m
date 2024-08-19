@@ -4,7 +4,7 @@ clear all; close all; clc
 close all; clc
 
 % load input force ("force") and time ("time)
-load experimental-data\3W_air_force.mat;
+load experimental-data\8W_water_force.mat;
 input_force = force / 1000; % N
 input_t = time - time(1); % sec
 data_freq = time(3) - time(2);
@@ -32,18 +32,18 @@ plot(cooling_t, cooling_force)
 %% T1 Thruster Configuration
 close all; clc
 
-tca_num = 4; % number of TCAs in the current configuration
+tca_num = 6; % number of TCAs in the current configuration
 
 d_cap = 48; %mm
 d_nozzle = 2; % mm
 pressure_term = 0.7*(d_cap^2 - d_nozzle^2)/d_cap^2; % dimensionless pressure force term
-pressure_term = 0;
+% pressure_term = 0;
 
-b_origami = 300; % damper (N*s/m) - found from system identification in 
-% b_origami = 2;
-k_origami = 98.1; % spring (N/m) - 0.004" plastic
+% b_origami = 300; % damper (N*s/m) - found from system identification in air 
+b_origami = 50;
+% k_origami = 98; % spring (N/m) - 0.004" plastic
 % k_origami = 18.25; % spring (N/m) - 0.002" plastic
-% k_origami = 187;
+k_origami = 187; % spring constant below 2mm
 
 m_cap = 0.015; % mass (kg)
 m_added = 0; % added water term
@@ -72,7 +72,7 @@ close all; clc
 
 % Heating response
 x0 = [0; 0];
-tfinal = 5.5;
+tfinal = 7;
 tspan = [0, tfinal];
 
 % find the state variables (x)
@@ -102,7 +102,7 @@ y_cooling(:,2) = x_cooling(:,1); % velocity of the mass
 close all; clc
 
 % load real data
-load experimental-data\3W_air_length.mat
+load experimental-data\t1-water-length.mat
 y = cast(Displacement, "double"); % mm
 t = Time; % sec
 data_freq = Time(3) - Time(2);
@@ -116,25 +116,22 @@ t = t - t(1);
 plot(t, y(1)-y)
 hold on
 plot(t_heating, y_heating(:,1)*1000)
-plot(t_cooling+5.5, y_cooling(:,1)*1000)
-% % plot(t_cooling+7, y_cooling(:,1)*1000)
+plot(t_cooling+7, y_cooling(:,1)*1000)
+% plot(t_cooling+7, y_cooling(:,1)*1000)
 xlabel("Time (sec)")
 ylabel("X_{mass} (mm)")
-title("Displacement of Cap")
+title("Displacement of Nozzle")
 legend("Data", "Contraction Model", "Expansion Model")
 
-% figure
-% subplot(1,2,1)
-% plot(t_heating, y_heating(:,2)*1000)
-% xlabel("Time (sec)")
-% ylabel("V_{mass} (mm/s)")
-% title("Velocity of Cap: Contraction")
-
-% subplot(1,2,2)
-% plot(t_cooling, y_cooling(:,2)*1000)
-% xlabel("Time (sec)")
-% ylabel("V_{mass} (mm/s)")
-% title("Velocity of Cap: Expansion")
+figure
+plot(t_heating, y_heating(:,2)*1000)
+hold on
+plot(t_cooling+7, y_cooling(:,2)*1000)
+% plot(t_cooling+7, y_cooling(:,2)*1000)
+xlabel("Time (sec)")
+ylabel("V_{mass} (mm/s)")
+title("Velocity of Nozzle")
+legend("Contraction Model", "Expansion Model")
 
 %% Animation
 p.srl = 0.04;
@@ -149,7 +146,7 @@ t_all = [t_heating; t_cooling+t_heating(end)+0.0000001]; % Need to add the 0.000
 X = [fixed_cap_pos moving_cap_pos];
 
 % Animate
-salp_no_fluids_animation(p,t_all,X,true,1);
+salp_no_fluids_animation(p,t_all,X,true,1,'water_animation');
 
 %% Functions
 

@@ -1,4 +1,4 @@
-function salp_no_fluids_animation(p,t,X,exportVideo,playbackRate)
+function salp_no_fluids_animation(p,t,X,exportVideo,playbackRate,videoName)
 % Load-Spring-Damper-Actuator Animation 
 % Input
 %   p: Simulation constants
@@ -54,7 +54,7 @@ h.figure.Children(1).DataAspectRatio = [1 1 1];
 
 % Setup videowriter object
 if exportVideo
-   v = VideoWriter('ME542_HW1_Animation', 'MPEG-4');
+   v = VideoWriter(videoName, 'MPEG-4');
    v.FrameRate = FPS;
    open(v)
 end
